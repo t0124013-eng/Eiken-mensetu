@@ -782,7 +782,7 @@ $('#gasTest').onclick = async () => {
   const u = $('#gasUrl').value.trim() || DEFAULT_GAS_URL;
   if(!u){ $('#gasMsg').textContent = 'URLが空です'; return; }
   $('#gasMsg').textContent = '確認中…';
-  try{ const r = await fetch(u); const j = await r.json(); $('#gasMsg').textContent = j.ok ? '接続OK（' + (j.model||'') + '）' : 'エラー: ' + j.error; }
+  try{ const r = await fetch(u); const j = await r.json(); $('#gasMsg').textContent = j.ok ? '接続OK（' + (j.model||'') + '）' + (j.sheet ? '／記録先：' + j.sheet : (j.sheetError ? '／記録先エラー：' + j.sheetError : '')) : 'エラー: ' + j.error; }
   catch(e){ $('#gasMsg').textContent = '接続できません: ' + e.message; }
 };
 
@@ -1462,6 +1462,12 @@ async function evaluate(){
       if(!j.ok) throw new Error(j.error || '採点に失敗しました');
       keepAwake(false);
       renderResult(parseJSONLoose(j.result));
+      if(j.logged === false){
+        const n = document.createElement('div');
+        n.className = 'small muted'; n.style.cssText = 'margin:0 0 12px;padding:10px 14px;border-radius:10px;background:#FBF1DC;color:#5A4210';
+        n.textContent = '※ この結果は先生の記録シートに保存できませんでした（' + (j.logError || '原因不明') + '）。評価はこのまま使えます。';
+        $('#result').prepend(n);
+      }
       return;
     }catch(e){
       console.error(e); lastErr = e;
