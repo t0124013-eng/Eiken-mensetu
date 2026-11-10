@@ -773,11 +773,11 @@ const stu = store.get('p1_student', {});
 $('#sCls').value = stu.cls || ''; $('#sNo').value = stu.no || ''; $('#sName').value = stu.name || '';
 $('#optSub').checked = store.get('p1_subs', false);
 $('#optLive').checked = store.get('p1_live', false);
-$('#gasUrl').value = store.get('p1_gas', '');
+$('#gasUrl').value = store.get('mensetsu_gas', '');
 if(!SR){ $('#srWarn').classList.remove('hidden'); document.querySelector('input[name=inMode][value=type]').checked = true; }
 
-function gasUrl(){ return (store.get('p1_gas','') || DEFAULT_GAS_URL || '').trim(); }
-$('#gasSave').onclick = () => { store.set('p1_gas', $('#gasUrl').value.trim()); $('#gasMsg').textContent = '保存しました'; };
+function gasUrl(){ return (store.get('mensetsu_gas','') || DEFAULT_GAS_URL || '').trim(); }
+$('#gasSave').onclick = () => { store.set('mensetsu_gas', $('#gasUrl').value.trim()); $('#gasMsg').textContent = '保存しました'; };
 $('#gasTest').onclick = async () => {
   const u = $('#gasUrl').value.trim() || DEFAULT_GAS_URL;
   if(!u){ $('#gasMsg').textContent = 'URLが空です'; return; }
