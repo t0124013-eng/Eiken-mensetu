@@ -387,9 +387,9 @@ h2.st{font-size:18px;margin:22px 0 10px;scroll-margin-top:120px}
       </div>
     </div>
 
-    <div class="blk">
-      <h2><span class="n">2</span>あなたの名前</h2>
-      <div class="fields">
+    <div class="blk" id="nameBlk">
+      <h2><span class="n">2</span>あなたの名前<small class="muted" style="font-weight:400;font-size:13px">最初の1回だけ。次からは「設定」で変えられます</small></h2>
+      <div class="fields" id="nameFields">
         <div><label class="f" for="sCls">クラス</label><input class="f" id="sCls" placeholder="2-3" autocomplete="off"></div>
         <div><label class="f" for="sNo">番号</label><input class="f" id="sNo" inputmode="numeric" placeholder="12" autocomplete="off"></div>
         <div><label class="f" for="sName">名前</label><input class="f" id="sName" placeholder="桜丘 花子" autocomplete="off"></div>
@@ -397,7 +397,7 @@ h2.st{font-size:18px;margin:22px 0 10px;scroll-margin-top:120px}
     </div>
 
     <div class="blk">
-      <h2><span class="n">3</span>練習のしかた</h2>
+      <h2><span class="n" id="nMode">3</span>練習のしかた</h2>
       <div class="modes">
         <label class="mode"><input type="radio" name="runMode" value="guided" checked><b>ガイドつき</b><span>音声ガイドと例文つきで、流れを確かめながら進む。はじめての人はここから</span></label>
         <label class="mode"><input type="radio" name="runMode" value="real"><b>本番モード</b><span>ガイドなし。面接官とのやりとりだけで最後まで</span></label>
@@ -405,15 +405,16 @@ h2.st{font-size:18px;margin:22px 0 10px;scroll-margin-top:120px}
     </div>
 
     <div class="blk">
-      <h2><span class="n">4</span>問題カード<span class="grade-tag" id="cardsGrade"></span></h2>
+      <h2><span class="n" id="nCard">4</span>問題カード<span class="grade-tag" id="cardsGrade"></span></h2>
       <div class="cards" id="cardList"></div>
     </div>
 
     <div id="srWarn" class="notice hidden" style="margin-bottom:14px">このブラウザは音声認識に対応していません。Google Chrome で開くか、設定で「キーボード」を選んでください。</div>
 
     <details class="fold">
-      <summary>設定<small>答え方・字幕・話す速さ</small></summary>
+      <summary>設定<small>名前・答え方・字幕・話す速さ</small></summary>
       <div class="fold-in opts">
+        <div id="nameSet" hidden><div class="opt-row" style="margin-bottom:8px"><div class="k">あなたの名前<small>記録に使います。変えるとすぐ保存されます</small></div></div><div id="nameSlot"></div></div>
         <div class="opt-row"><div class="k">答え方</div>
           <div class="seg"><label><input type="radio" name="inMode" value="voice" checked><span>声</span></label><label><input type="radio" name="inMode" value="type"><span>キーボード</span></label></div></div>
         <div class="opt-row"><div class="k">面接官の話す速さ</div>
@@ -771,6 +772,18 @@ function renderHist(){
 $('#histClear').onclick = () => { if(confirm('この端末の記録をすべて消しますか？')){ store.set('p1_hist', []); renderHist(); renderCards(); } };
 const stu = store.get('p1_student', {});
 $('#sCls').value = stu.cls || ''; $('#sNo').value = stu.no || ''; $('#sName').value = stu.name || '';
+/* 名前は最初の1回だけトップで入力。登録後は「設定」の中に移す */
+function placeName(){
+  const reg = !!(store.get('p1_student', {}).name || '').trim();
+  const f = $('#nameFields');
+  if(reg){ $('#nameSlot').appendChild(f); $('#nameBlk').hidden = true; $('#nameSet').hidden = false; $('#nMode').textContent = '2'; $('#nCard').textContent = '3'; }
+  else { $('#nameBlk').appendChild(f); $('#nameBlk').hidden = false; $('#nameSet').hidden = true; $('#nMode').textContent = '3'; $('#nCard').textContent = '4'; }
+}
+['#sCls','#sNo','#sName'].forEach(id => $(id).addEventListener('input', () => {
+  if(!$('#nameSet').hidden) store.set('p1_student', { cls: $('#sCls').value.trim(), no: $('#sNo').value.trim(), name: $('#sName').value.trim() });
+  if(typeof updateSum === 'function') updateSum();
+}));
+placeName();
 $('#optSub').checked = store.get('p1_subs', false);
 $('#optLive').checked = store.get('p1_live', false);
 $('#gasUrl').value = store.get('mensetsu_gas', '');
@@ -1499,7 +1512,7 @@ function renderManual(reason, canRetry){
   $('#homeBtn2').onclick = goHome;
   if(canRetry) $('#retryBtn').onclick = evaluate;
 }
-function goHome(){ renderCards(); renderHist(); show('home'); }
+function goHome(){ placeName(); renderCards(); renderHist(); show('home'); }
 
 
 const clamp = (v, max) => Math.max(0, Math.min(max, Math.round(Number(v) || 0)));
